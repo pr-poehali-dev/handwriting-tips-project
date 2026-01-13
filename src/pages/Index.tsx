@@ -4,7 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import Icon from '@/components/ui/icon';
+import ExerciseCanvas from '@/components/ExerciseCanvas';
 
 interface Exercise {
   id: string;
@@ -13,6 +15,7 @@ interface Exercise {
   difficulty: 'easy' | 'medium' | 'hard';
   description: string;
   completed: boolean;
+  template: 'lines' | 'circles' | 'letters';
 }
 
 interface Recommendation {
@@ -24,6 +27,7 @@ interface Recommendation {
 
 const Index = () => {
   const [activeTab, setActiveTab] = useState('home');
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
   const [exercises, setExercises] = useState<Exercise[]>([
     {
       id: '1',
@@ -32,6 +36,7 @@ const Index = () => {
       difficulty: 'easy',
       description: 'Отработка равномерного наклона и интервалов между штрихами',
       completed: true,
+      template: 'lines',
     },
     {
       id: '2',
@@ -40,6 +45,7 @@ const Index = () => {
       difficulty: 'easy',
       description: 'Изучение округлых форм в строчных буквах',
       completed: true,
+      template: 'letters',
     },
     {
       id: '3',
@@ -48,6 +54,7 @@ const Index = () => {
       difficulty: 'medium',
       description: 'Плавные переходы между буквами в словах',
       completed: false,
+      template: 'letters',
     },
     {
       id: '4',
@@ -56,6 +63,7 @@ const Index = () => {
       difficulty: 'medium',
       description: 'Отработка пропорций и декоративных элементов',
       completed: false,
+      template: 'letters',
     },
     {
       id: '5',
@@ -64,6 +72,16 @@ const Index = () => {
       difficulty: 'hard',
       description: 'Написание коротких предложений с сохранением стиля',
       completed: false,
+      template: 'letters',
+    },
+    {
+      id: '6',
+      title: 'Круговые движения',
+      category: 'Основы',
+      difficulty: 'easy',
+      description: 'Отработка плавных круговых форм для букв',
+      completed: false,
+      template: 'circles',
     },
   ]);
 
@@ -224,7 +242,7 @@ const Index = () => {
                       <CardDescription>{exercise.description}</CardDescription>
                     </CardHeader>
                     <CardContent>
-                      <Button className="w-full bg-indigo-500 hover:bg-indigo-600" onClick={() => toggleExerciseComplete(exercise.id)}>
+                      <Button className="w-full bg-indigo-500 hover:bg-indigo-600" onClick={() => setSelectedExercise(exercise)}>
                         <Icon name="PlayCircle" size={18} className="mr-2" />
                         Начать упражнение
                       </Button>
@@ -281,7 +299,7 @@ const Index = () => {
                           <Button
                             variant={exercise.completed ? "outline" : "default"}
                             className={exercise.completed ? "w-full" : "w-full bg-indigo-500 hover:bg-indigo-600"}
-                            onClick={() => toggleExerciseComplete(exercise.id)}
+                            onClick={() => setSelectedExercise(exercise)}
                           >
                             {exercise.completed ? (
                               <>
@@ -346,6 +364,32 @@ const Index = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <Dialog open={selectedExercise !== null} onOpenChange={(open) => !open && setSelectedExercise(null)}>
+          <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-heading flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <Icon name="PenTool" className="text-white" size={20} />
+                </div>
+                {selectedExercise?.title}
+              </DialogTitle>
+              <DialogDescription className="text-base">
+                {selectedExercise?.description}
+              </DialogDescription>
+            </DialogHeader>
+            {selectedExercise && (
+              <ExerciseCanvas
+                exerciseId={selectedExercise.id}
+                template={selectedExercise.template}
+                onComplete={() => {
+                  toggleExerciseComplete(selectedExercise.id);
+                  setSelectedExercise(null);
+                }}
+              />
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   );
